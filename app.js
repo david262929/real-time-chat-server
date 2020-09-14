@@ -30,12 +30,8 @@ io.on('connection', socket => {
 
     socket.on('sendMessage', (message, callback) => {
         const user = USERS.get(socket.id);
-        console.log({
-            allUsers : USERS.users,
-            user,
-            socketID : socket.id
-        });
         io.to(user.room).emit('message', { user : user.name, text : message});
+        callback();
     });
 
     socket.on('disconnect', () => {
