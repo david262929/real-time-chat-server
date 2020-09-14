@@ -3,6 +3,8 @@ const express = require('express')
 const socketio = require('socket.io')
 const http = require('http')
 
+const USERS = require('./src/models/User');
+
 const PORT = process.env.NODE_PORT || 5000
 
 const app = express()
@@ -11,6 +13,30 @@ const io = socketio(server)
 
 io.on('connection', socket => {
     console.log('We have new connection')
+
+    socket.on('join', ({name, room}, callback) => {
+        const { error, user } = USERS.add({ id: socket.id, name, room })
+
+        if( error ) {
+            return callback(error)
+        }
+
+        socket.emit('message', { user : 'admin', text : `${user.name} welcome to the room ${user.room}`});
+        socket.broadcast.to(user.room).emit('message', { user : 'admin', text : `${user.name}, has joined`})
+        socket.join(user.room);
+
+        callback();
+    })
+
+    socket.on('sendMessage', (message, callback) => {
+        const user = USERS.get(socket.id);
+        console.log({
+            allUsers : USERS.users,
+            user,
+            socketID : socket.id
+        });
+        io.to(user.room).emit('message', { user : user.name, text : message});
+    });
 
     socket.on('disconnect', () => {
         console.log('User had left !!!')
