@@ -25,7 +25,7 @@ io.on('connection', socket => {
         socket.broadcast.to(user.room).emit('message', { user : 'admin', text : `${user.name}, has joined`})
         socket.join(user.room);
 
-        socket.emit('roomData', { room : user.room, users : getUsersInRoom(user.room)});
+        socket.emit('roomData', { room : user.room, users : USERS.getUsersInRoom(user.room)});
 
         callback();
     })
@@ -34,7 +34,7 @@ io.on('connection', socket => {
         const user = USERS.get(socket.id);
 
         io.to(user.room).emit('message', { user : user.name, text : message});
-        socket.emit('roomData', { room : user.room, users : getUsersInRoom(user.room)});
+        socket.emit('roomData', { room : user.room, users : USERS.getUsersInRoom(user.room)});
 
         callback();
     });
